@@ -1,0 +1,151 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Country {
+  id            Int       @id @default(autoincrement())
+  country_name  String    @db.VarChar(100)
+  iso_code      String    @unique @db.VarChar(50)
+  mobile_code   Int       @db.SmallInt()
+  currency_code String    @db.VarChar(10)
+  is_active     Boolean   @default(false)
+  created_at    DateTime  @default(now())
+  created_by    Int?
+  updated_at    DateTime  @updatedAt
+  updated_by    Int?
+  is_deleted    Boolean   @default(false)
+  deleted_at    DateTime?
+  deleted_by    Int?
+  states        State[]
+
+  @@map("countries")
+}
+
+model vehicleType {
+  id                        Int       @id @default(autoincrement())
+  type                      String    @unique @db.VarChar(25)
+  is_active                 Boolean   @default(false)
+  image                     String?   @db.VarChar(255)
+  vehicle_type_associations Decimal?  @default(0)
+  created_at                DateTime  @default(now())
+  created_by                Int?
+  updated_at                DateTime  @updatedAt
+  updated_by                Int?
+  is_deleted                Boolean   @default(false)
+  deleted_at                DateTime?
+  deleted_by                Int?
+
+  @@map("vehicle_types")
+}
+
+model State {
+  id         Int       @id @default(autoincrement())
+  country_id Int
+  country    Country   @relation(fields: [country_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  image      String?   @db.VarChar(255)
+  state_name String    @db.VarChar(100)
+  short_code String    @db.VarChar(50)
+  is_active  Boolean   @default(false)
+  created_at DateTime  @default(now())
+  created_by Int?
+  updated_at DateTime  @updatedAt
+  updated_by Int?
+  is_deleted Boolean   @default(false)
+  deleted_at DateTime?
+  deleted_by Int?
+  cities     City[]
+  yards      Yard[]
+  rtos       Rto[]
+
+  @@unique([country_id, state_name])
+  @@map("states")
+}
+
+model City {
+  id         Int       @id @default(autoincrement())
+  state_id   Int
+  state      State     @relation(fields: [state_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  image      String?   @db.VarChar(255)
+  city_name  String    @db.VarChar(100)
+  is_active  Boolean   @default(false)
+  created_at DateTime  @default(now())
+  created_by Int?
+  updated_at DateTime  @updatedAt
+  updated_by Int?
+  is_deleted Boolean   @default(false)
+  deleted_at DateTime?
+  deleted_by Int?
+  yards      Yard[]
+
+  @@unique([state_id, city_name])
+  @@map("cities")
+}
+
+model Yard {
+  id                Int       @id @default(autoincrement())
+  yard_name         String    @unique @db.VarChar(100)
+  yard_address      String
+  city              City      @relation(fields: [yard_city_id], references: [id])
+  yard_city_id      Int
+  yard_city_name    String
+  state             State     @relation(fields: [yard_state_id], references: [id])
+  yard_state_id     Int
+  yard_state_name   String
+  is_active         Boolean   @default(true)
+  yard_associations Decimal?  @default(0)
+  created_at        DateTime  @default(now())
+  created_by        Int?
+  updated_at        DateTime  @updatedAt
+  updated_by        Int?
+  is_deleted        Boolean   @default(false)
+  deleted_at        DateTime?
+  deleted_by        Int?
+
+  @@map("yards")
+}
+
+model Rto {
+  id             Int       @id @default(autoincrement())
+  reg_no         String    @unique @db.VarChar(25)
+  address        String
+  rto_state_id   Int
+  state          State     @relation(fields: [rto_state_id], references: [id])
+  rto_state_name String
+  is_active      Boolean   @default(true)
+  created_at     DateTime  @default(now())
+  created_by     Int?
+  updated_at     DateTime  @updatedAt
+  updated_by     Int?
+  is_deleted     Boolean   @default(false)
+  deleted_at     DateTime?
+  deleted_by     Int?
+
+  @@map("rtos")
+}
+
+model fuelType {
+  id                     Int       @id @default(autoincrement())
+  fuel_type              String    @unique @db.VarChar(25)
+  is_active              Boolean   @default(false)
+  fuel_type_associations Decimal?  @default(0)
+  created_at             DateTime  @default(now())
+  created_by             Int?
+  updated_at             DateTime  @updatedAt
+  updated_by             Int?
+  is_deleted             Boolean   @default(false)
+  deleted_at             DateTime?
+  deleted_by             Int?
+
+  @@map("fuel_types")
+}
